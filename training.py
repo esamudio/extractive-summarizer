@@ -8,4 +8,3 @@ with open('training-test.txt', 'w') as outfile:
         outfile.write(
             key + '\t' + str(word_counts[key]) + '\t' + str(log(number_of_documents/word_counts[key])) + '\n'
         )
-pass

@@ -55,6 +55,22 @@ def train_scores(sentences, cosine_threshold):
     return L
 
 
+def load_file(filename):
+    """
+    Extracts words and their respective counts from file created in training section.
+    :param filename: name of file made in training
+    :type filename: str
+    :return: dictionary of words with their respective counts {word:count}
+    :rtype: dict
+    """
+    word_counts = {}
+    with open(filename, 'r') as infile:
+        for line in infile:
+            word, count, idf = line.split()
+            word_counts[word] = float(idf)
+    return word_counts
+
+
 def extract_text(filename):
     """
     This function processes articles from the CNN dataset, extracts all the sentences in a list
@@ -97,7 +113,16 @@ def extract_text(filename):
     sentences = [sentence for (sentence, rank) in sentences_rank.items()]
     return sentences, sentences_rank
 
+
 def word_counter(path):
+    """
+    Iterates through all files in path to obtain idf counts for each word
+    :param path: path from which to obtain summary files
+    :type path: str
+    :return: dictionary containing the counts of how many documents a word was seen
+    in along with the total number of documents
+    :rtype: tup (dict, int)
+    """
     single_document_word_counts = {}
     multiple_document_word_count = defaultdict(float)
     number_of_documents = 0
