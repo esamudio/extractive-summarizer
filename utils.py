@@ -1,3 +1,6 @@
+from collections import defaultdict
+from os import walk
+
 def idf_modified_cosine():
 
 
@@ -64,8 +67,18 @@ def extract_text(filename):
     text = ''
     with open('../neuralsum/cnn/training/' + filename, 'r') as infile:
         text = ''.join(infile.readlines())
-
-    url, sentences, highlights, maps = text.split('\n\n')
+    text_tokens = text.split('\n\n')
+    url=sentences=highlights=maps=''
+    if len(text_tokens) == 4:
+        url, sentences, highlights, maps = text_tokens
+    else:
+        url = text_tokens[0]
+        sentences = text_tokens[1]
+        highlights = text_tokens[2]
+        for i in range(3, len(text_tokens)):
+            maps += text_tokens[i] + '\n'
+        else:
+            maps = maps[:-1]
 
     # entities
     entities = {mapping.split(':')[0]:mapping.split(':')[1] for mapping in maps.split('\n')}
@@ -83,3 +96,20 @@ def extract_text(filename):
     sentences_rank = {token.split('\t\t\t')[0]: token.split('\t\t\t')[1] for token in (sentence for sentence in sentences.split('\n'))}
     sentences = [sentence for (sentence, rank) in sentences_rank.items()]
     return sentences, sentences_rank
+
+def word_counter(path):
+    single_document_word_counts = {}
+    multiple_document_word_count = defaultdict(float)
+    number_of_documents = 0
+    for (dirpath, dirnames, filenames) in walk(path):
+        for filename in filenames:
+            sentences, sentences_rank = extract_text(filename)
+            sentences = ' '.join(sentences)
+            for word in sentences.split():
+                if word not in single_document_word_counts:
+                    single_document_word_counts[word] = 1
+            for key in single_document_word_counts.keys():
+                multiple_document_word_count[key] += 1
+            single_document_word_counts = {}
+            number_of_documents += 1
+    return dict(multiple_document_word_count), number_of_documents
