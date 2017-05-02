@@ -1,3 +1,55 @@
+def idf_modified_cosine():
+
+
+
+def PowerMethod(cosine_matrix, matrix_size, error_tolerance):
+    """
+
+    :param cosine_matrix: Cosine Matrix from train_scores
+    :param matrix_size: Size of the matrix(sentence)
+    :param error_tolerance: Error tolerance
+    :return eigenvector p
+    """
+
+    t = 0
+    while (result < error_tolerance):
+        t += 1
+        # TODO: Finish Algorithm 2
+
+
+def train_scores(sentences, cosine_threshold):
+    """
+
+    :param sentences: An array S of n sentences
+    :param cosine_threshold: cosine threshold, t,
+    :return An array of L of LexRank scores.
+
+    """
+    n = len(sentences)
+    cosine_matrix = {}  # size n*n
+    degree = {}  # size n
+    L = {}  # size n
+
+    for i in range(n):  # for i <- 1 to n do...
+        for j in range(n):  # for j <- 1 to n do...
+            cosine_tuple = (i, j)
+            # TODO: idf_modified_cosine(sentence[i], sentence[j])
+            cosine_matrix[cosine_tuple] = idf_modified_cosine(sentences[i], sentences[j])
+            if cosine_matrix[cosine_tuple] > cosine_threshold:
+                cosine_matrix[cosine_tuple] = 1
+                degree[i] = 1 if i not in degree else degree[i]+1
+            else:
+                cosine_matrix[cosine_tuple] = 0
+    # end
+    for i in range(n):  # for i <- 1 to n do...
+        for j in range(n):  # for j <- 1 to n do...
+            cosine_tuple = (i, j)
+            cosine_matrix[cosine_tuple] = cosine_matrix[cosine_tuple]/degree[i]     # might need to handle degree[i]
+    # end
+    # TODO: Error Tolerance
+    # TODO: PowerMethod(cosine_matrix, n, e)
+    L = PowerMethod(cosine_matrix, n, error_tolerance)
+    return L
 
 
 def extract_text(filename):
