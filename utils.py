@@ -1,8 +1,36 @@
 from collections import defaultdict
 from os import walk
+from math import sqrt
 
-def idf_modified_cosine():
 
+def idf_modified_cosine(x, y, idf):
+    """
+    Computes the idf modified cosine of two sentences, using the idf values from training
+    :param x: sentence x
+    :type x: list
+    :param y: sentence y
+    :type y: list
+    :param idf: inverse document frequency of words seen in training
+    :type idf: defaultdict
+    :return: idf-modified-cosine value of both sentences (similarity between them)
+    :rtype: float
+    """
+    x_words = x.split()
+    y_words = y.split()
+    words = x_words + y_words
+    # Pw∈x,y tfw,xtfw,y(idfw)^2
+    numerator = 0
+    for word in words:
+        numerator += x_words.count(word) * y_words.count(word) * (idf[word]**2)
+    #√(Pxi∈x(tfxi,xidfxi)^2) × √(Pyi∈y(tfyi,yidfyi)^2)
+    denominator_x = 0
+    for word in x_words:
+        denominator_x += (x_words.count(word) * idf[word])**2
+    denominator_y = 0
+    for word in y_words:
+        denominator_y += (y_words.count(word) * idf[word])**2
+    denominator = sqrt(denominator_x) * sqrt(denominator_y)
+    return numerator/denominator
 
 
 def PowerMethod(cosine_matrix, matrix_size, error_tolerance):
@@ -20,7 +48,7 @@ def PowerMethod(cosine_matrix, matrix_size, error_tolerance):
         # TODO: Finish Algorithm 2
 
 
-def train_scores(sentences, cosine_threshold):
+def train_scores(sentences, cosine_threshold, idf):
     """
 
     :param sentences: An array S of n sentences
@@ -36,8 +64,7 @@ def train_scores(sentences, cosine_threshold):
     for i in range(n):  # for i <- 1 to n do...
         for j in range(n):  # for j <- 1 to n do...
             cosine_tuple = (i, j)
-            # TODO: idf_modified_cosine(sentence[i], sentence[j])
-            cosine_matrix[cosine_tuple] = idf_modified_cosine(sentences[i], sentences[j])
+            cosine_matrix[cosine_tuple] = idf_modified_cosine(sentences[i], sentences[j], idf)
             if cosine_matrix[cosine_tuple] > cosine_threshold:
                 cosine_matrix[cosine_tuple] = 1
                 degree[i] = 1 if i not in degree else degree[i]+1
@@ -61,14 +88,14 @@ def load_file(filename):
     :param filename: name of file made in training
     :type filename: str
     :return: dictionary of words with their respective counts {word:count}
-    :rtype: dict
+    :rtype: defaultdict
     """
-    word_counts = {}
+    words_idf = defaultdict(float)
     with open(filename, 'r') as infile:
         for line in infile:
             word, count, idf = line.split()
-            word_counts[word] = float(idf)
-    return word_counts
+            words_idf[word] = float(idf)
+    return words_idf
 
 
 def extract_text(filename):
