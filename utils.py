@@ -41,11 +41,25 @@ def PowerMethod(cosine_matrix, matrix_size, error_tolerance):
     :param error_tolerance: Error tolerance
     :return eigenvector p
     """
+    N = len(cosine_matrix.keys())
+    p0 = 1/N
+    t = 0 # p_t-1
+    p = {}
 
-    t = 0
-    while (result < error_tolerance):
-        t += 1
-        # TODO: Finish Algorithm 2
+    for x, y in cosine_matrix.keys(): # Initialize dictionary p
+        p[x] = p0
+
+    while True:
+        pt = {}
+        for x, y in cosine_matrix.keys():
+            pt[x] = cosine_matrix[(x, y)] * p[x]
+        result = 0
+        for x in pt.keys():
+            result += (pt[x] - p[x]) ** 2
+        p = pt
+        if result < error_tolerance:
+            break
+    return p
 
 
 def train_scores(sentences, cosine_threshold, idf):
