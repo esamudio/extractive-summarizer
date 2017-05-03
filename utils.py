@@ -70,8 +70,9 @@ def lexrank(sentences, cosine_threshold, idf, error_tolerance):
     Computes lexrank scores for a given article (list of sentences)
     :param sentences: An array S of n sentences
     :type sentences: list of list
-    :param cosine_threshold: cosine threshold
-    :type cosine_threshold:
+    :param cosine_threshold: cosine threshold for LexRank algorithm
+    (reduce number of edges, non-significant sentence similarities)
+    :type cosine_threshold: float
     :param idf: inverse document frequency values for words seen in training
     :type idf: dict
     :param error_tolerance: makers Markov Chain robust for errors (https://goo.gl/VFhiqv) e.g. 0.00001
@@ -99,10 +100,34 @@ def lexrank(sentences, cosine_threshold, idf, error_tolerance):
             cosine_tuple = (i, j)
             cosine_matrix[cosine_tuple] = cosine_matrix[cosine_tuple]/degree[i]     # might need to handle degree[i]
     # end
-    # TODO: Error Tolerance
-    # TODO: PowerMethod(cosine_matrix, n, e)
     L = power_method(cosine_matrix, n, error_tolerance)
     return L
+
+
+def summarizer(filename, cosine_threshold, idf, error_tolerance):
+    """
+    Summarizes a text file using LexRank algorithm
+    :param filename: File to summarize
+    :type filename: str
+    :param cosine_threshold: cosine threshold for LexRank algorithm
+    (reduce number of edges, non-significant sentence similarities)
+    :type cosine_threshold:
+    :param idf: dictionary containing inverse document frequencies of words seen in training
+    :type idf: dict
+    :param error_tolerance: makers Markov Chain robust for errors (https://goo.gl/VFhiqv) e.g. 0.00001
+    :type error_tolerance: float
+    :return: summary of file passed in @filename
+    :rtype: str
+    """
+    sentences, sentences_rank = extract_text(filename)
+    scores = lexrank(sentences, cosine_threshold, idf, error_tolerance)
+    # consider using arbitrary summary length cutoff instead of filtering out non-zeroes
+    sorted_scores = {k: v for k, v in scores.items() if v != 0}
+    sorted_scores = sorted(sorted_scores.items(), key=lambda x:x[1], reverse=True)
+    summary = ''
+    for k, v in sorted_scores:
+        summary += sentences[k] + '\n'
+    return summary
 
 
 def load_file(filename):
@@ -125,14 +150,14 @@ def extract_text(filename):
     """
     This function processes articles from the CNN dataset, extracts all the sentences in a list
     along with a dictionary that maps the sentences with their respective sentence labels.
-    :param filename: name of file with text to summarize
+    :param filename: File with text to summarize
     :type filename: str
     :return: list of sentences and a dictionary that maps each sentence with their respective sentence label
     :rtype: list, list of tup
     """
     text = ''
     # read article
-    with open('../neuralsum/cnn/training/' + filename, 'r') as infile:
+    with open(filename, 'r') as infile:
         text = ''.join(infile.readlines())
     # split sections
     text_tokens = text.split('\n\n')

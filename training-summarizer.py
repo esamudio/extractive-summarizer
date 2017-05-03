@@ -18,7 +18,10 @@ if __name__ == '__main__':
     parser.add_argument('OUTPUT_FILE', type=str, help=OUTPUT_FILE_DESC)
     args = parser.parse_args()
 
+    # compute word counts and idf values for words in training
     word_counts, number_of_documents = word_counter(args.TRAINING_DIRECTORY)
+
+    # output training data
     with open(args.OUTPUT_FILE, 'w') as outfile:
         for key in word_counts.keys():
             outfile.write(
