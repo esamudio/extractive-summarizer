@@ -5,7 +5,7 @@ from utils import word_counter
 from math import log
 
 # constants
-DESC = '''This application calculates the inverse document frequencies (idf) of every word in the training data.'''
+DESC = '''This application calculates the inverse document frequencies (idf) of every word in the training dataset.'''
 TRAINING_DIRECTORY_DESC = '''The directory containing text files to be used in training.'''
 OUTPUT_FILE_DESC = '''File containing every word in training,
 the amount of times each word was seen and its corresponding idf.'''
