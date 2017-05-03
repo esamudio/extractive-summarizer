@@ -7,9 +7,9 @@ def idf_modified_cosine(x, y, idf):
     """
     Computes the idf modified cosine of two sentences, using the idf values from training
     :param x: sentence x
-    :type x: list
+    :type x: str
     :param y: sentence y
-    :type y: list
+    :type y: str
     :param idf: inverse document frequency of words seen in training
     :type idf: defaultdict
     :return: idf-modified-cosine value of both sentences (similarity between them)
@@ -22,7 +22,7 @@ def idf_modified_cosine(x, y, idf):
     numerator = 0
     for word in words:
         numerator += x_words.count(word) * y_words.count(word) * (idf[word]**2)
-    #√(Pxi∈x(tfxi,xidfxi)^2) × √(Pyi∈y(tfyi,yidfyi)^2)
+    # √(Pxi∈x(tfxi,xidfxi)^2) × √(Pyi∈y(tfyi,yidfyi)^2)
     denominator_x = 0
     for word in x_words:
         denominator_x += (x_words.count(word) * idf[word])**2
@@ -46,10 +46,10 @@ def power_method(cosine_matrix, matrix_size, error_tolerance):
     :rtype: dict
     """
     p0 = 1/matrix_size
-    t = 0 # p_t-1
+    t = 0  # p_t-1
     p = {}
 
-    for x, y in cosine_matrix.keys(): # Initialize dictionary p
+    for x, y in cosine_matrix.keys():  # Initialize dictionary p
         p[x] = p0
 
     while True:
@@ -74,7 +74,7 @@ def lexrank(sentences, cosine_threshold, idf, error_tolerance):
     (reduce number of edges, non-significant sentence similarities)
     :type cosine_threshold: float
     :param idf: inverse document frequency values for words seen in training
-    :type idf: dict
+    :type idf: defaultdict
     :param error_tolerance: makers Markov Chain robust for errors (https://goo.gl/VFhiqv) e.g. 0.00001
     :type error_tolerance: float
     :return A dictionary of L of LexRank scores.
@@ -83,7 +83,7 @@ def lexrank(sentences, cosine_threshold, idf, error_tolerance):
     n = len(sentences)
     cosine_matrix = {}  # size n*n
     degree = {}  # size n
-    L = {}  # size n
+    l = {}  # size n
 
     for i in range(n):  # for i <- 1 to n do...
         for j in range(n):  # for j <- 1 to n do...
@@ -100,8 +100,8 @@ def lexrank(sentences, cosine_threshold, idf, error_tolerance):
             cosine_tuple = (i, j)
             cosine_matrix[cosine_tuple] = cosine_matrix[cosine_tuple]/degree[i]     # might need to handle degree[i]
     # end
-    L = power_method(cosine_matrix, n, error_tolerance)
-    return L
+    l = power_method(cosine_matrix, n, error_tolerance)
+    return l
 
 
 def summarizer(filename, cosine_threshold, idf, error_tolerance):
@@ -123,7 +123,7 @@ def summarizer(filename, cosine_threshold, idf, error_tolerance):
     scores = lexrank(sentences, cosine_threshold, idf, error_tolerance)
     # consider using arbitrary summary length cutoff instead of filtering out non-zeroes
     sorted_scores = {k: v for k, v in scores.items() if v != 0}
-    sorted_scores = sorted(sorted_scores.items(), key=lambda x:x[1], reverse=True)
+    sorted_scores = sorted(sorted_scores.items(), key=lambda x: x[1], reverse=True)
     summary = ''
     for k, v in sorted_scores:
         summary += sentences[k] + '\n'
@@ -161,7 +161,7 @@ def extract_text(filename):
         text = ''.join(infile.readlines())
     # split sections
     text_tokens = text.split('\n\n')
-    url=sentences=highlights=maps=''
+    url = sentences = highlights = maps = ''
     if len(text_tokens) == 4:
         url, sentences, highlights, maps = text_tokens
     else:
@@ -174,9 +174,8 @@ def extract_text(filename):
         else:
             maps = maps[:-1]
     # entities
-    entities = {mapping.split(':')[0]:mapping.split(':')[1] for mapping in maps.split('\n')}
+    entities = {mapping.split(':')[0]: mapping.split(':')[1] for mapping in maps.split('\n')}
     # sentences
-    processed_sentences = []
     entity_tag = '@entity'
     while entity_tag in sentences:
         start_index = sentences.find(entity_tag)
