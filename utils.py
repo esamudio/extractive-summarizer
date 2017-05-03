@@ -205,6 +205,8 @@ def word_counter(path):
     number_of_documents = 0
     for (dirpath, dirnames, filenames) in walk(path):
         for filename in filenames:
+            if filename.endswith('.summary'):
+                continue
             # read text
             sentences, sentences_rank = extract_text(path + filename)
             sentences = ' '.join(sentences)
