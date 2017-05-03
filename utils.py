@@ -33,16 +33,19 @@ def idf_modified_cosine(x, y, idf):
     return numerator/denominator
 
 
-def PowerMethod(cosine_matrix, matrix_size, error_tolerance):
+def power_method(cosine_matrix, matrix_size, error_tolerance):
     """
-
-    :param cosine_matrix: Cosine Matrix from train_scores
+    Compute the stationary distribution of a Markov chain
+    :param cosine_matrix: Cosine Matrix from lexrank
+    :type cosine_matrix: dict
     :param matrix_size: Size of the matrix(sentence)
-    :param error_tolerance: Error tolerance
-    :return eigenvector p
+    :type matrix_size: int
+    :param error_tolerance: Error tolerance (threshold over which to filter out edges)
+    :type error_tolerance: float
+    :return: Stationary distribution of a Markov chain (e.g. cosine matrix)
+    :rtype: dict
     """
-    N = len(cosine_matrix.keys())
-    p0 = 1/N
+    p0 = 1/matrix_size
     t = 0 # p_t-1
     p = {}
 
@@ -62,13 +65,19 @@ def PowerMethod(cosine_matrix, matrix_size, error_tolerance):
     return p
 
 
-def train_scores(sentences, cosine_threshold, idf):
+def lexrank(sentences, cosine_threshold, idf, error_tolerance):
     """
-
+    Computes lexrank scores for a given article (list of sentences)
     :param sentences: An array S of n sentences
-    :param cosine_threshold: cosine threshold, t,
-    :return An array of L of LexRank scores.
-
+    :type sentences: list of list
+    :param cosine_threshold: cosine threshold
+    :type cosine_threshold:
+    :param idf: inverse document frequency values for words seen in training
+    :type idf: dict
+    :param error_tolerance: makers Markov Chain robust for errors (https://goo.gl/VFhiqv) e.g. 0.00001
+    :type error_tolerance: float
+    :return A dictionary of L of LexRank scores.
+    :rtype: dict
     """
     n = len(sentences)
     cosine_matrix = {}  # size n*n
@@ -92,16 +101,16 @@ def train_scores(sentences, cosine_threshold, idf):
     # end
     # TODO: Error Tolerance
     # TODO: PowerMethod(cosine_matrix, n, e)
-    L = PowerMethod(cosine_matrix, n, error_tolerance)
+    L = power_method(cosine_matrix, n, error_tolerance)
     return L
 
 
 def load_file(filename):
     """
-    Extracts words and their respective counts from file created in training section.
+    Extracts words and their respective inverse document frequencies from file created in training section.
     :param filename: name of file made in training
     :type filename: str
-    :return: dictionary of words with their respective counts {word:count}
+    :return: dictionary of words with their respective idf values {word:idf}
     :rtype: defaultdict
     """
     words_idf = defaultdict(float)
@@ -122,13 +131,16 @@ def extract_text(filename):
     :rtype: list, list of tup
     """
     text = ''
+    # read article
     with open('../neuralsum/cnn/training/' + filename, 'r') as infile:
         text = ''.join(infile.readlines())
+    # split sections
     text_tokens = text.split('\n\n')
     url=sentences=highlights=maps=''
     if len(text_tokens) == 4:
         url, sentences, highlights, maps = text_tokens
     else:
+        # some entities have extra '\n\n' between them
         url = text_tokens[0]
         sentences = text_tokens[1]
         highlights = text_tokens[2]
@@ -136,10 +148,8 @@ def extract_text(filename):
             maps += text_tokens[i] + '\n'
         else:
             maps = maps[:-1]
-
     # entities
     entities = {mapping.split(':')[0]:mapping.split(':')[1] for mapping in maps.split('\n')}
-
     # sentences
     processed_sentences = []
     entity_tag = '@entity'
@@ -150,14 +160,16 @@ def extract_text(filename):
             end_index += 1
         entity = sentences[start_index:end_index+1]
         sentences = sentences.replace(entity, entities[entity])
-    sentences_rank = {token.split('\t\t\t')[0]: token.split('\t\t\t')[1] for token in (sentence for sentence in sentences.split('\n'))}
+    # separate sentences from 'sentence label'
+    sentences_rank = {token.split('\t\t\t')[0]: token.split('\t\t\t')[1]
+                      for token in (sentence for sentence in sentences.split('\n'))}
     sentences = [sentence for (sentence, rank) in sentences_rank.items()]
     return sentences, sentences_rank
 
 
 def word_counter(path):
     """
-    Iterates through all files in path to obtain idf counts for each word
+    Iterates through all files in path to obtain the inverse document frequency (idf) values for each word
     :param path: path from which to obtain summary files
     :type path: str
     :return: dictionary containing the counts of how many documents a word was seen
@@ -169,11 +181,14 @@ def word_counter(path):
     number_of_documents = 0
     for (dirpath, dirnames, filenames) in walk(path):
         for filename in filenames:
+            # read text
             sentences, sentences_rank = extract_text(filename)
             sentences = ' '.join(sentences)
+            # account for having seen each word once in the current document
             for word in sentences.split():
                 if word not in single_document_word_counts:
                     single_document_word_counts[word] = 1
+            # add one count for having seen each of the words in yet another document
             for key in single_document_word_counts.keys():
                 multiple_document_word_count[key] += 1
             single_document_word_counts = {}
