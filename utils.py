@@ -206,7 +206,7 @@ def word_counter(path):
     for (dirpath, dirnames, filenames) in walk(path):
         for filename in filenames:
             # read text
-            sentences, sentences_rank = extract_text(filename)
+            sentences, sentences_rank = extract_text(path + filename)
             sentences = ' '.join(sentences)
             # account for having seen each word once in the current document
             for word in sentences.split():
