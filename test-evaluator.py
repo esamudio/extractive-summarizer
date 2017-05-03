@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
             # obtain sentences and sentence labels
             # sentences, sentences_rank = extract_text(args.ORIGINAL_FILE)
-            sentences, sentences_rank = extract_text(filename)
+            sentences, sentences_rank = extract_text('../neuralsum/cnn/test/' + filename)
             # read summary
             summary_sentences = None
             with open(filename + '.summary', 'r') as infile:
