@@ -13,10 +13,12 @@ Extractive Summarizer using LexRank.
 
 2. **Train summarizer** 
     Use training-summarizer.py on the training dataset - This application calculates the inverse document frequencies (idf) of every word in the training dataset.
+    
     usage: training-summarizer [-h] TRAINING_DIRECTORY OUTPUT_FILE
 3. **Summarize test file**
     Use test-summarizer.py on test dataset - This application summarizes a given article using previously calculated
 inverse document frequencies (idf).
+    
     usage: test-summarizer [-h] IDF_FILE ORIGINAL_FILE
 
 ## Dev Guide
