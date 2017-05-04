@@ -6,6 +6,7 @@ Extractive-Summarizer using LexRank.
 1. **Import the repository folder into Pycharm**
     
 2. **Download CNN datasets into project directory**
+
     [Dataset](https://docs.google.com/uc?id=0B0Obe9L1qtsnSXZEd0JCenIyejg&export=download)
 
 ## Usage
