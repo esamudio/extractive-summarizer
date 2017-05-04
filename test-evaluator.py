@@ -6,19 +6,17 @@ from utils import extract_text
 
 # constants
 DESC = '''This application evaluates our LexRank summarizer using the sentence labels provided in the dataset.'''
-SUMMARIZED_FILE_DESC = '''Summarized file.'''
-ORIGINAL_FILE_DESC = '''File from dataset.'''
+SUMMARIES_DIRECTORY_DESC = '''Directory containing original and summarized (.summary) files.'''
 
 if __name__ == '__main__':
     # setup argument parser
     parser = argparse.ArgumentParser(prog='test-evaluator', description=DESC)
-    # parser.add_argument('SUMMARIZED_FILE', type=str, help=SUMMARIZED_FILE_DESC)
-    # parser.add_argument('ORIGINAL_FILE', type=str, help=ORIGINAL_FILE_DESC)
+    parser.add_argument('SUMMARIES_DIRECTORY', type=str, help=SUMMARIES_DIRECTORY_DESC)
     args = parser.parse_args()
     overall_sentence_labels = {}
     sentence_label_count = {}
 
-    path = '../neuralsum/cnn/test/'
+    path = args.SUMMARIES_DIRECTORY
     for (dirpath, dirnames, filenames) in walk(path):
         for filename in filenames:
             if filename.endswith('.summary'):
@@ -42,19 +40,6 @@ if __name__ == '__main__':
                 overall_sentence_labels[index] = 1 if index not in overall_sentence_labels else overall_sentence_labels[
                                                                                               index] + 1
 
-    # print sentence label counts
-    print("What we got:")
-    for sentence_label, count in sentence_label_count.items():
-        print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count))
-
-    print("\nOverall in dataset:")
-    for sentence_label, count in overall_sentence_labels.items():
-        print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count))
-
-    print("\nAccuracy:")
+    print("Accuracy:")
     for sentence_label, count in sentence_label_count.items():
         print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count/overall_sentence_labels[sentence_label]))
-
-    print("\nPrecision:")
-    for sentence_label, count in sentence_label_count.items():
-        print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count / overall_sentence_labels[sentence_label]))
