@@ -53,4 +53,8 @@ if __name__ == '__main__':
 
     print("\nAccuracy:")
     for sentence_label, count in sentence_label_count.items():
-        print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count))
+        print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count/overall_sentence_labels[sentence_label]))
+
+    print("\nPrecision:")
+    for sentence_label, count in sentence_label_count.items():
+        print('Sentence Label: ' + sentence_label + ' / Count: ' + str(count / overall_sentence_labels[sentence_label]))
